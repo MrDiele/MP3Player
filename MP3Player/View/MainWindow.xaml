@@ -1,0 +1,124 @@
+﻿<Window x:Class="MP3Player.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MP3Player"
+        mc:Ignorable="d"
+        Title="&#171;MP3Player&#187;" Height="390" Width="600" Closing="Window_Closing">
+        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition />
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Border  Grid.Row="1" Background="Gray">
+            <ContentControl Content="ContentControl"  FontFamily="Vladimir Script"/>
+        </Border>
+        <StatusBar Grid.Row="2">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <TextBlock Visibility="Hidden"></TextBlock>
+            <StatusBarItem Grid.Column="1">
+                <TextBlock  x:Name="txb_Selected" Visibility="Hidden"></TextBlock>
+            </StatusBarItem>
+        </StatusBar>
+        <Menu x:Name="menu" Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="About" Click="Window_About"></MenuItem>
+                <Separator />
+                <MenuItem Header="Exit" Click="Window_Closing"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Vertical" >
+                <ListBox x:Name="m_listmp" ItemsSource="{Binding Path= m_mp3file}" Height="30">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Canvas x:Name="Canvas" Background="Transparent" Height="25" VerticalAlignment="Top">
+                                <TextBlock VerticalAlignment="Bottom" FontWeight="Light" Foreground="White" Name="mp3_name" Text="{Binding Path= Name}" FontSize="15" Height="30" Canvas.Right="0">
+                                    <TextBlock.Triggers>
+                                        <EventTrigger RoutedEvent="TextBlock.Loaded">
+                                            <EventTrigger.Actions>
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation    
+                                                        Storyboard.TargetProperty="(Canvas.Left)" 
+                                                        From="600" To="-600" Duration="0:0:10" 
+                                                        RepeatBehavior="Forever"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger.Actions>
+                                        </EventTrigger>
+                                    </TextBlock.Triggers>
+                                </TextBlock>
+                            </Canvas>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="31*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Трэк " FontFamily="Vladimir Script" FontSize="20"/>
+                        <TextBlock Text="Громкость" FontSize="20"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Grid.ColumnSpan="2">
+                        <Slider x:Name="m_Slider" Margin="5" ToolTip="Слайдер" IsManipulationEnabled="True" IsEnabled="True" IsMoveToPointEnabled="True" AllowDrop="True" PreviewMouseLeftButtonUp="m_Slider_PreviewMouseLeftButtonUp" />
+                        <Slider x:Name="m_Volume" Margin="5,5,300,5" ToolTip="Громкость" ValueChanged="OnValueChange"></Slider>
+                    </StackPanel>
+                </Grid>
+                <StackPanel Height="30" Orientation="Horizontal">
+                    <Button Height="20" Width="20" Margin="5" Background="LightGray" ToolTip="Предыдущая дорожка" Click="OnClickPrev">
+                        <Image Source="../Resourse/Image/player_rev.png"></Image>
+                    </Button>
+                    <Button Height="20" Width="20" Background="LightGray" ToolTip="Воспроизводить" Click="OnClickButtonPlay">
+                        <Image Source="../Resourse/Image/Play.png"></Image>
+                    </Button>
+                    <Button Height="20" Width="20" Background="LightGray" ToolTip="Приостановить" Click="OnClickPause">
+                        <Image Source="../Resourse/Image/Pause.png"></Image>
+                    </Button>
+                    <Button Height="20" Width="20" Background="LightGray" ToolTip="Остановить" Click="OnClickStop">
+                        <Image Source="../Resourse/Image/Stop.png"></Image>
+                    </Button>
+                    <Button Height="20" Width="20" Background="LightGray" ToolTip="Следующая дорожка" Click="OnClickNext">
+                        <Image Source="../Resourse/Image/player_fwd.png"></Image>
+                    </Button>
+                    <Button Height="20" Width="20" Margin="20,5,0,5" Background="LightGray" ToolTip="Открыть файл" Click="OnClickBrowsButton">
+                        <Image Source="../Resourse/Image/player_eject.png"></Image>
+                    </Button>
+
+                    <TextBlock x:Name="m_TextBlock" Foreground="White" FontSize="20" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="310,3,0,3" Width="110" ></TextBlock>
+                </StackPanel>
+                <ListView x:Name="m_listBox" >
+                    <ListView.View>
+                        <GridView>
+                            <GridView.Columns>
+                                <GridViewColumn Header="Трек" Width="450" DisplayMemberBinding="{Binding Path=Name}"></GridViewColumn>
+                                <GridViewColumn Header="Время" Width="100" DisplayMemberBinding="{Binding Path= MPtime}" FrameworkElement.FlowDirection="RightToLeft"></GridViewColumn>
+                            </GridView.Columns>
+                        </GridView>
+                    </ListView.View>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Delete" Click="MenuItem_Click"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                </ListView>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
