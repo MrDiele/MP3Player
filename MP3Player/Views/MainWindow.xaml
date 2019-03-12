@@ -1,0 +1,155 @@
+﻿<Window x:Class="MP3Player.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="&#171;MP3Player&#187;" Height="390" Width="600" >
+    <!--Closing="Window_Closing"-->
+
+    <Window.Resources>
+        <CollectionViewSource Source="{Binding ListMP3}" x:Key="ListMP3"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Border  Grid.Row="2" Background="Gray">
+            <ContentControl Content="ContentControl"  FontFamily="Vladimir Script" Margin="0,0,0,-29" Height="328" VerticalAlignment="Top"/>
+        </Border>
+
+        <Menu x:Name="menu" Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Header="Добавить трэк" Command="{Binding OnClickBrows}"></MenuItem>
+                <MenuItem Header="About" Command="{Binding Window_About}"></MenuItem>
+                <Separator />
+                <MenuItem Header="Exit" Command="{Binding Window_Closing}"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ListBox x:Name="m_listmp" ItemsSource="{Binding Path= MP3file}" Height="30" Grid.Row="0">
+                <!--ItemsSource="{Binding Path= SelectedMP3}"-->
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Canvas x:Name="Canvas" Background="Transparent" Height="25" VerticalAlignment="Top">
+                            <TextBlock VerticalAlignment="Bottom" FontWeight="Light" Foreground="White" Text="{Binding Path= Name}" FontSize="15" Height="30" Canvas.Right="0">
+                                <TextBlock.Triggers>
+                                    <EventTrigger RoutedEvent="TextBlock.Loaded">
+                                        <EventTrigger.Actions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation    
+                                                        Storyboard.TargetProperty="(Canvas.Left)" 
+                                                        From="600" To="-600" Duration="0:0:10" 
+                                                        RepeatBehavior="Forever"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger.Actions>
+                                    </EventTrigger>
+                                </TextBlock.Triggers>
+                            </TextBlock>
+                        </Canvas>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <Grid Height="40" Grid.Row="1">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Height="30" Width="30" Background="Gray" ToolTip="Предыдущая дорожка" Command="{Binding OnClickPrev}" Margin="0,0,10,0">
+                        <Button.Template>
+                            <ControlTemplate  TargetType="Button">
+                                <Grid>
+                                    <Ellipse Fill="Gray"></Ellipse>
+                                    <Image Source="../Resourse/Image/player_rev.png"></Image>
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>  
+                    </Button>
+                    <Button Height="40" Width="40" ToolTip="Воспроизводить" Command="{Binding OnClickPlay}">
+                        <Button.Template>
+                            <ControlTemplate  TargetType="Button">
+                                <Grid>
+                                    <Ellipse Fill="Gray"></Ellipse>
+                                    <Image Source="../Resourse/Image/Play.png"></Image>
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Height="30" Width="30"  Background="Gray" ToolTip="Следующая дорожка" Command="{Binding OnClickNext}" Margin="5,0,0,0">
+                        <Button.Template>
+                            <ControlTemplate  TargetType="Button">
+                                <Grid>
+                                    <Ellipse Fill="Gray"></Ellipse>
+                                    <Image Source="../Resourse/Image/player_fwd.png"></Image>
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+                <Slider x:Name="m_Volume" ToolTip="Громкость"  
+                                    Maximum="40" 
+                                    Minimum="0"
+                                    Value="{Binding Volume, Mode=TwoWay}" Height="20" VerticalAlignment="Center" HorizontalAlignment="Right" Width="150"/>
+
+                <TextBlock x:Name="m_TextBlock" Text="{Binding Path= Time}" Foreground="Black" FontSize="20" Width="102" VerticalAlignment="Center" Margin="10,0,28,0" HorizontalAlignment="Left"/>
+
+            </Grid>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <!--<StackPanel Grid.Column="0">
+                        <TextBlock Text="Трэк " FontFamily="Vladimir Script" FontSize="20"/>
+                        <TextBlock Text="Громкость" FontSize="20"/>
+                    </StackPanel>-->
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2">
+                    <Slider x:Name="m_Slider" Margin="5" ToolTip="Полоса прокрутки" IsManipulationEnabled="True" IsEnabled="True" IsMoveToPointEnabled="True" AllowDrop="True"   
+                                Maximum="{Binding SliderMaximum}" 
+                                Minimum="{Binding SliderMinimum}" 
+                                Value="{Binding SliderValue, Mode=TwoWay}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="PreviewMouseLeftButtonUp">
+                                <i:InvokeCommandAction Command="{Binding PreviewMouseLeftButtonUp}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Slider>
+                </StackPanel>
+            </Grid>
+            <ListView x:Name="m_listBox" Grid.Row="3"  ItemsSource="{Binding ListMP3}" SelectedItem="{Binding SelectedMP3}">
+                <!--DataContextChanged="OnMainGridDataContextChanged"-->
+                <ListView.View>
+                    <GridView>
+                        <GridView.Columns>
+                            <GridViewColumn Header="Трек" Width="450" DisplayMemberBinding="{Binding Path=Name}"></GridViewColumn>
+                            <GridViewColumn Header="Время" Width="100" DisplayMemberBinding="{Binding Path= MPtime}" FrameworkElement.FlowDirection="RightToLeft"></GridViewColumn>
+                        </GridView.Columns>
+                    </GridView>
+                </ListView.View>
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Delete" Command="{Binding MenuItem_Click}"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                <!--<i:Interaction.Triggers>
+                        <i:EventTrigger EventName="DragEnter">
+                            <i:InvokeCommandAction Command="{Binding DragEnter}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="Drop">
+                            <i:InvokeCommandAction Command="{Binding Drop}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>-->
+            </ListView>
+        </Grid>
+    </Grid>
+</Window>
