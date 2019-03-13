@@ -1,5 +1,4 @@
 # MP3Player
-The first trial application written in WPF
 
 Задача: Cоздание MP3 проигрывателя со следующм функционалом:
 1) Проигрывание музыки, с полосой прокрутки
