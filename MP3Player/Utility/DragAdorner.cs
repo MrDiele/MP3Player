@@ -1,5 +1,4 @@
-﻿// Copyright (C) Josh Smith - January 2007
-using System.Windows.Documents;
+﻿using System.Windows.Documents;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -14,7 +13,7 @@ namespace MP3Player.Utility
     {
         #region Data
 
-        private Rectangle child = null;
+        private readonly Rectangle child = null;
         private double offsetLeft = 0;
         private double offsetTop = 0;
 
@@ -31,11 +30,13 @@ namespace MP3Player.Utility
         public DragAdorner(UIElement adornedElement, Size size, Brush brush)
             : base(adornedElement)
         {
-            Rectangle rect = new Rectangle();
-            rect.Fill = brush;
-            rect.Width = size.Width;
-            rect.Height = size.Height;
-            rect.IsHitTestVisible = false;
+            Rectangle rect = new Rectangle
+            {
+                Fill = brush,
+                Width = size.Width,
+                Height = size.Height,
+                IsHitTestVisible = false
+            };
             this.child = rect;
         }
 
@@ -67,7 +68,7 @@ namespace MP3Player.Utility
         /// </summary>
         public double OffsetLeft
         {
-            get { return this.offsetLeft; }
+            get { return offsetLeft; }
             set
             {
                 this.offsetLeft = value;
@@ -100,7 +101,7 @@ namespace MP3Player.Utility
         /// </summary>
         public double OffsetTop
         {
-            get { return this.offsetTop; }
+            get { return offsetTop; }
             set
             {
                 this.offsetTop = value;
@@ -121,8 +122,8 @@ namespace MP3Player.Utility
         /// <returns></returns>
         protected override Size MeasureOverride(Size constraint)
         {
-            this.child.Measure(constraint);
-            return this.child.DesiredSize;
+            child.Measure(constraint);
+            return child.DesiredSize;
         }
 
         /// <summary>
@@ -132,7 +133,7 @@ namespace MP3Player.Utility
         /// <returns></returns>
         protected override Size ArrangeOverride(Size finalSize)
         {
-            this.child.Arrange(new Rect(finalSize));
+            child.Arrange(new Rect(finalSize));
             return finalSize;
         }
 
@@ -143,7 +144,7 @@ namespace MP3Player.Utility
         /// <returns></returns>
         protected override Visual GetVisualChild(int index)
         {
-            return this.child;
+            return child;
         }
 
         /// <summary>
@@ -160,9 +161,8 @@ namespace MP3Player.Utility
 
         private void UpdateLocation()
         {
-            AdornerLayer adornerLayer = this.Parent as AdornerLayer;
-            if (adornerLayer != null)
-                adornerLayer.Update(this.AdornedElement);
+            if (Parent is AdornerLayer adornerLayer)
+                adornerLayer.Update(AdornedElement);
         }
 
         #endregion // Private Helpers

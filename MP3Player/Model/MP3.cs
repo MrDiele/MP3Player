@@ -8,37 +8,50 @@ namespace MP3Player.Model
     [Serializable]
     class MP3
     {
-        private string name;
-        private string path;
-        private bool hasID3Tag;
-        private string id3Album;
-        private string id3Artist;
-        private string id3Comment;
-        private byte id3Genre;
-        private Genres genre;
-        private string id3Title;
-        private byte id3TrackNumber;
-        private string id3Year;
-        private string mptime;
-        private double duration;
-
         public MP3()
         {
-
-            this.hasID3Tag = false;
-            this.id3Album = string.Empty;
-            this.name = string.Empty;
-            this.path = string.Empty;
-            this.id3Comment = string.Empty;
-            this.id3Title = string.Empty;
-            this.id3Year = string.Empty;
-            this.id3Artist = string.Empty;
-            this.id3Genre = 0;
-            this.id3TrackNumber = 0;
-            this.mptime = string.Empty;
-            this.duration = 0;
-            this.genre = Genres.None;
+            HasID3Tag = false;
+            Id3Album = string.Empty;
+            Name = string.Empty;
+            Path = string.Empty;
+            Id3Commnet = string.Empty;
+            Id3Title = string.Empty;
+            Id3Year = string.Empty;
+            Id3Artist = string.Empty;
+            Id3Genre = 0;
+            Id3TrackNumber = 0;
+            MPtime = string.Empty;
+            Duration = 0;
+            Genre = Genres.None;
         }
+        
+        #region Get/Set
+        public Genres Genre { get; set; }
+
+        public double Duration { get; set; }
+
+        public string MPtime { get; set; }
+
+        public bool HasID3Tag { get; set; }
+
+        public string Id3Album { get; set; }
+
+        public string Name { get; set; }
+
+        public string Path { get; set; }
+
+        public string Id3Commnet { get; set; }
+
+        public string Id3Title { get; set; }
+
+        public string Id3Artist { get; set; }
+
+        public string Id3Year { get; set; }
+
+        public byte Id3Genre { get; set; }
+
+        public byte Id3TrackNumber { get; set; }
+        #endregion
 
         public static void SerializeObject(ObservableCollection<MP3> mp3col)
         {
@@ -58,163 +71,6 @@ namespace MP3Player.Model
                 mp3col = (ObservableCollection<MP3>)binary.Deserialize(fstream);
             }
             return mp3col;
-        }
-
-        public Genres Genre
-        {
-            get
-            {
-                return this.genre;
-            }
-            set
-            {
-                this.genre = value;
-            }
-        }
-
-        public double Duration
-        {
-            get
-            {
-                return this.duration;
-            }
-            set
-            {
-                this.duration = value;
-            }
-        }
-
-        public string MPtime
-        {
-            get
-            {
-                return this.mptime;
-            }
-            set
-            {
-                this.mptime = value;
-            }
-        }
-
-        public bool HasID3Tag
-        {
-            get
-            {
-                return this.hasID3Tag;
-            }
-            set
-            {
-                this.hasID3Tag = value;
-            }
-        }
-
-        public string Id3Album
-        {
-            get
-            {
-                return this.id3Album;
-            }
-            set
-            {
-                this.id3Album = value;
-            }
-        }
-
-        public string Name
-        {
-            get
-            {
-                return this.name;
-            }
-            set
-            {
-                this.name = value;
-            }
-        }
-
-        public string Path
-        {
-            get
-            {
-                return this.path;
-            }
-            set
-            {
-                this.path = value;
-            }
-        }
-
-        public string Id3Commnet
-        {
-            get
-            {
-                return this.id3Comment;
-            }
-            set
-            {
-                this.id3Comment = value;
-            }
-        }
-
-        public string Id3Title
-        {
-            get
-            {
-                return this.id3Title;
-            }
-            set
-            {
-                this.id3Title = value;
-            }
-
-        }
-
-        public string Id3Artist
-        {
-            get
-            {
-                return this.id3Artist;
-            }
-            set
-            {
-                this.id3Artist = value;
-            }
-        }
-
-        public string Id3Year
-        {
-            get
-            {
-                return this.id3Year;
-            }
-            set
-            {
-                this.id3Year = value;
-            }
-        }
-
-        public byte Id3Genre
-        {
-            get
-            {
-                return this.id3Genre;
-            }
-            set
-            {
-                this.id3Genre = value;
-            }
-        }
-
-        public byte Id3TrackNumber
-        {
-            get
-            {
-                return this.id3TrackNumber;
-            }
-            set
-            {
-                this.id3TrackNumber = value;
-            }
         }
     }
 }

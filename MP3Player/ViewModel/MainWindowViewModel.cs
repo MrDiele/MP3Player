@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
 using MP3Player.Commands;
 using MP3Player.Model;
-using MP3Player.Utility;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -16,30 +15,26 @@ namespace MP3Player.ViewModel
     class MainWindowViewModel : ViewModelBase
     {
         #region Fields
-        private ObservableCollection<MP3> m_listMP3 = new ObservableCollection<MP3>();
-        private ObservableCollection<MP3> m_MP3file = new ObservableCollection<MP3>();
+        private ObservableCollection<MP3> _listMP3 = new ObservableCollection<MP3>();
+        private ObservableCollection<MP3> _mp3file = new ObservableCollection<MP3>();
+        readonly WindowsMediaPlayer player = new WindowsMediaPlayer();
+        private readonly DispatcherTimer _timer = new DispatcherTimer();
 
-        WindowsMediaPlayer Player = new WindowsMediaPlayer();
-        private DispatcherTimer timer = new DispatcherTimer();
+        private double _slidervalue;
+        private double _maximumLimit;
+        private double _minimumLimit;
 
-        private double slidervalue;
-        private double maximumLimit;
-        private double minimumLimit;
+        private string _trackName;
 
-        private string trackName;
-
-
-        private MP3 selectedMP3;
-        private bool Stopped = false;
-        private bool Paused = false;
-        private string filename = string.Empty;
-        private string name = string.Empty;
-        private string time_s = string.Empty;
-        private int minute = 0;
-        private int second = 0;
-        private double time = 0;
-        private double Position = 0;
-        private bool flag = true;
+        private MP3 _selectedMP3;
+        private bool _stopped = false;
+        private bool _paused = false;
+        private string _filename = string.Empty;
+        private string _name = string.Empty;
+        private string _time_s = string.Empty;
+        private double _time = 0;
+        private double _position = 0;
+        private bool _flag = true;
 
         private ICommand window_About;
         private ICommand window_Closing;
@@ -51,7 +46,6 @@ namespace MP3Player.ViewModel
         private ICommand onClickBrowsButton;
         private ICommand menuItem_Click;
         private ICommand previewMouseLeftButtonUp;
-        readonly ListViewDragDropManager<MP3> dragMgr;
         #endregion
 
         #region Конструктор
@@ -66,15 +60,15 @@ namespace MP3Player.ViewModel
 
                 for (int i = 0; i < mp3col.Count; i++)
                 {
-                    m_listMP3.Add(mp3col[i]);
+                    _listMP3.Add(mp3col[i]);
                 }
             }
             catch { }
 
-            Player.settings.volume = 25;
-            Player.PlayStateChange += OnStateChanged;
-            timer.Interval = new TimeSpan(10000000);
-            timer.Tick += OnTick;
+            player.settings.volume = 25;
+            player.PlayStateChange += OnStateChanged;
+            _timer.Interval = new TimeSpan(10000000);
+            _timer.Tick += OnTick;
             //dragMgr = new ListViewDragDropManager<MP3>(m_listMP3);
             //this.m_listBox.DragEnter += OnListViewDragEnter;
             //this.m_listBox.Drop += OnListViewDrop;
@@ -91,10 +85,10 @@ namespace MP3Player.ViewModel
             /// </summary>
             public string Time
             {
-                get { return time_s; }
+                get { return _time_s; }
                 set
                 {
-                    time_s = value;
+                    _time_s = value;
                     base.RaisePropertyChangedEvent("Time");
                 }
             }
@@ -106,10 +100,10 @@ namespace MP3Player.ViewModel
             /// </summary>
             public int Volume
             {
-                get { return Player.settings.volume; }
+                get { return player.settings.volume; }
                 set
                 {
-                    Player.settings.volume = value;
+                    player.settings.volume = value;
                     base.RaisePropertyChangedEvent("Volume");
                 }
             }
@@ -121,10 +115,10 @@ namespace MP3Player.ViewModel
             /// </summary>
             public double SliderMaximum
             {
-                get { return maximumLimit; }
+                get { return _maximumLimit; }
                 set
                 {
-                    maximumLimit = value;
+                    _maximumLimit = value;
                     base.RaisePropertyChangedEvent("SliderMaximum");
                 }
             }
@@ -134,10 +128,10 @@ namespace MP3Player.ViewModel
             /// </summary>
             public double SliderMinimum
             {
-                get { return minimumLimit; }
+                get { return _minimumLimit; }
                 set
                 {
-                    minimumLimit = value;
+                    _minimumLimit = value;
                     base.RaisePropertyChangedEvent("SliderMinimum");
                 }
             } 
@@ -147,10 +141,10 @@ namespace MP3Player.ViewModel
             /// </summary>
             public double SliderValue
             {
-                get { return slidervalue; }
+                get { return _slidervalue; }
                 set
                 {
-                    slidervalue = value;
+                    _slidervalue = value;
                     base.RaisePropertyChangedEvent("SliderValue");
                 }
             }
@@ -162,11 +156,11 @@ namespace MP3Player.ViewModel
         /// </summary>
         public MP3 SelectedMP3
         {
-            get { return selectedMP3; }
+            get { return _selectedMP3; }
 
             set
             {
-                selectedMP3 = value;
+                _selectedMP3 = value;
                 RaisePropertyChangedEvent("SelectedMP3");
             }
         }
@@ -178,11 +172,11 @@ namespace MP3Player.ViewModel
         /// </summary>
         public string TrackName
         {
-            get { return trackName; }
+            get { return _trackName; }
 
             set
             {
-                trackName = value;
+                _trackName = value;
                 RaisePropertyChangedEvent("TrackName");
             }
         }
@@ -193,11 +187,11 @@ namespace MP3Player.ViewModel
         /// </summary>
         public ObservableCollection<MP3> ListMP3
         {
-            get { return m_listMP3; }
+            get { return _listMP3; }
 
             set
             {
-                m_listMP3 = value;
+                _listMP3 = value;
                 RaisePropertyChangedEvent("m_listBox");
             }
         }
@@ -207,11 +201,11 @@ namespace MP3Player.ViewModel
         /// </summary>
         public ObservableCollection<MP3> MP3file
         {
-            get { return m_MP3file; }
+            get { return _mp3file; }
 
             set
             {
-                m_MP3file = value;
+                _mp3file = value;
                 RaisePropertyChangedEvent("m_mp3file");
             }
         }
@@ -245,7 +239,7 @@ namespace MP3Player.ViewModel
             {
                 return previewMouseLeftButtonUp ?? (previewMouseLeftButtonUp = new RelayCommand((o) =>
                 {
-                    Player.controls.currentPosition = SliderValue;
+                    player.controls.currentPosition = SliderValue;
                 }));
             }
         }
@@ -259,7 +253,7 @@ namespace MP3Player.ViewModel
             {
                 return window_Closing ?? (window_Closing = new RelayCommand((o) => 
                 {
-                    MP3.SerializeObject(m_listMP3);
+                    MP3.SerializeObject(_listMP3);
                 }));
             }
         }
@@ -357,10 +351,13 @@ namespace MP3Player.ViewModel
             {
                 return menuItem_Click ?? (menuItem_Click = new RelayCommand((o) => 
                 {
-                    m_listMP3.Remove(SelectedMP3);
+                    _listMP3.Remove(SelectedMP3);
                 }));
             }
         }
+
+        public int Minute { get; set; } = 0;
+        public int Second { get; set; } = 0;
 
         #endregion
 
@@ -371,9 +368,9 @@ namespace MP3Player.ViewModel
         /// </summary>
         private void OnClickPrevButton()
         {
-            Stopped = true;
-            Player.controls.stop();
-            Stopped = false;
+            _stopped = true;
+            player.controls.stop();
+            _stopped = false;
             MP3 previndex = null;
             try
             {
@@ -386,43 +383,43 @@ namespace MP3Player.ViewModel
             if (previndex != null)
             {
                 SelectedMP3 = previndex;
-                Player.URL = (previndex).Path;
+                player.URL = (previndex).Path;
                 AddToListMP3();
-                time = (SelectedMP3).Duration;
-                SliderMaximum = time;
+                _time = (SelectedMP3).Duration;
+                SliderMaximum = _time;
                 SliderMinimum = 0;
                 SliderValue = 0;
                 TrackName = SelectedMP3.Name;
-                Player.controls.play();
-                timer.Start();
+                player.controls.play();
+                _timer.Start();
             }
         }
 
         /// <summary>
-        /// Обработка нажатия клавиши проигрывания трэка.  
+        /// Обработка нажатия клавиши проигрывания трэка.  // допилить обработку в соответсвии с новым интерфейсом
         /// </summary>
         private void OnClickPlayButton()
         {
             if (SelectedMP3 != null)
             {
-                if (!Paused)
+                if (!_paused)
                 {
-                    Player.URL = SelectedMP3.Path;
-                    time = Math.Round(SelectedMP3.Duration);
+                    player.URL = SelectedMP3.Path;
+                    _time = Math.Round(SelectedMP3.Duration);
                     AddToListMP3();
-                    SliderMaximum = time;
+                    SliderMaximum = _time;
                     SliderMinimum = 0;
                     SliderValue = 0;
                     TrackName = SelectedMP3.Name;
-                    Player.controls.play();
+                    player.controls.play();
 
-                    timer.Start();
+                    _timer.Start();
                 }
                 else
                     OnClickPauseButton();
 
-                if (Stopped)
-                    Stopped = false;
+                if (_stopped)
+                    _stopped = false;
             }
             else
                 MessageBox.Show("Выберите трек для проигрывания!", "Выбор трека", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -433,22 +430,22 @@ namespace MP3Player.ViewModel
         /// </summary>
         private void OnClickPauseButton()
         {
-            if (!Paused)
+            if (!_paused)
             {
-                Player.controls.pause();
-                Position = Player.controls.currentPosition;
-                if (Position != 0)
-                    Paused = !Paused;
+                player.controls.pause();
+                _position = player.controls.currentPosition;
+                if (_position != 0)
+                    _paused = !_paused;
             }
             else
             {
-                Player.controls.currentPosition = Position;
+                player.controls.currentPosition = _position;
 
-                if (Player.controls.currentPosition != 0)
+                if (player.controls.currentPosition != 0)
                 {
-                    Player.controls.play();
-                    timer.Start();
-                    Paused = !Paused;
+                    player.controls.play();
+                    _timer.Start();
+                    _paused = !_paused;
                 }
             }
         }
@@ -458,10 +455,10 @@ namespace MP3Player.ViewModel
         /// </summary>
         private void OnClickStopButton()
         {
-            Paused = false;
-            Stopped = true;
+            _paused = false;
+            _stopped = true;
             MP3file.Clear();
-            Player.controls.stop();
+            player.controls.stop();
         }
 
         /// <summary>
@@ -469,9 +466,9 @@ namespace MP3Player.ViewModel
         /// </summary>
         private void OnClickNextButton()
         {
-            Stopped = true;
-            Player.controls.stop();
-            Stopped = false;
+            _stopped = true;
+            player.controls.stop();
+            _stopped = false;
             MP3 nextrack = null;
             try
             {
@@ -484,15 +481,15 @@ namespace MP3Player.ViewModel
             if (nextrack != null)
             {
                 SelectedMP3 = nextrack;
-                Player.URL = (SelectedMP3).Path;
+                player.URL = (SelectedMP3).Path;
                 AddToListMP3();
-                time = (SelectedMP3).Duration;
-                SliderMaximum = time;
+                _time = (SelectedMP3).Duration;
+                SliderMaximum = _time;
                 SliderMinimum = 0;
                 SliderValue = 0;
                 TrackName = SelectedMP3.Name;
-                Player.controls.play();
-                timer.Start();
+                player.controls.play();
+                _timer.Start();
             }
         }
 
@@ -509,16 +506,16 @@ namespace MP3Player.ViewModel
             if (m_openfiledlg.ShowDialog() == true)
             {
                 bool flag = true;
-                this.filename = m_openfiledlg.FileName;
-                this.name = System.IO.Path.GetFileNameWithoutExtension(this.filename);
-                for (int i = 0; i < m_listMP3.Count; i++)
+                this._filename = m_openfiledlg.FileName;
+                this._name = System.IO.Path.GetFileNameWithoutExtension(this._filename);
+                for (int i = 0; i < _listMP3.Count; i++)
                 {
-                    if (m_listMP3[i].Path == this.filename)
+                    if (_listMP3[i].Path == this._filename)
                         flag = false;
                 }
                 if (flag)
                 {
-                    m_listMP3.Add(TrackCreate(this.filename, this.name));
+                    _listMP3.Add(TrackCreate(this._filename, this._name));
                 }
                 else
                     MessageBox.Show("Этот трэк уже добавлен!", "Ошибка добавления", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -530,7 +527,7 @@ namespace MP3Player.ViewModel
         /// </summary>
         private void MenuItem_ClickButton()
         {
-            m_listMP3.Remove(ListMP3.GetEnumerator().Current);
+            _listMP3.Remove(ListMP3.GetEnumerator().Current);
         }
         #endregion
 
@@ -582,7 +579,7 @@ namespace MP3Player.ViewModel
         /// <returns>Колличество минут.</returns>
         private int GetMinutes(double time)
         {
-            return minute = (int)(time / 60);
+            return Minute = (int)(time / 60);
         }
 
         /// <summary>
@@ -593,14 +590,14 @@ namespace MP3Player.ViewModel
         /// <returns>Колличество секунд.</returns>
         private int GetSeconds(double time, int minute)
         {
-            return second = (int)(time - minute * 60);
+            return Second = (int)(time - minute * 60);
         }
 
         private void AddToListMP3()
         {
             if (MP3file.Count != 0)
                 MP3file.Clear();
-            m_MP3file.Add(SelectedMP3);      
+            _mp3file.Add(SelectedMP3);      
         }
 
         /// <summary>
@@ -611,18 +608,18 @@ namespace MP3Player.ViewModel
         {
             if (state == 1)
             {
-                if (Stopped)
+                if (_stopped)
                 {
-                    timer.Stop();
+                    _timer.Stop();
 
                     Time = "";
                     SliderValue = 0;
                 }
-                else if (state == 1 && !Stopped)
+                else if (state == 1 && !_stopped)
                 {
-                    if (flag)
+                    if (_flag)
                     {
-                        timer.Stop();
+                        _timer.Stop();
                         MP3 nextrack = null;
 
                         try
@@ -634,25 +631,25 @@ namespace MP3Player.ViewModel
                         if (nextrack != null)
                         {
                             SelectedMP3 = nextrack;
-                            Player.URL = (SelectedMP3).Path;
+                            player.URL = (SelectedMP3).Path;
                             AddToListMP3();
-                            time = Math.Round(SelectedMP3.Duration);
-                            SliderMaximum = time;
+                            _time = Math.Round(SelectedMP3.Duration);
+                            SliderMaximum = _time;
                             SliderMinimum = 0;
                             SliderValue = 0;
                             TrackName = SelectedMP3.Name;
 
-                            timer.Interval = new TimeSpan(10000000);
+                            _timer.Interval = new TimeSpan(10000000);
 
-                            timer.Start();
-                            flag = false;
+                            _timer.Start();
+                            _flag = false;
                         }
                     }
                 }
             }
             else if (state == 2)
             {
-                timer.Stop();
+                _timer.Stop();
             }
         }
 
@@ -669,10 +666,10 @@ namespace MP3Player.ViewModel
             int s = GetSeconds(dif, m);
             Time = string.Format("{0}:{1}", m, s);
 
-            if (!flag)
+            if (!_flag)
             {
-                flag = !flag;
-                Player.controls.play();
+                _flag = !_flag;
+                player.controls.play();
             }
         }
 
@@ -688,8 +685,8 @@ namespace MP3Player.ViewModel
             ReadMP3File(ref file, filename);
             file.Path = filename;
             file.Name = name;
-            file.MPtime = Player.newMedia(this.filename).durationString;
-            file.Duration = Player.newMedia(this.filename).duration;
+            file.MPtime = player.newMedia(this._filename).durationString;
+            file.Duration = player.newMedia(this._filename).duration;
             GetMinutes(file.Duration);
             return file;
         }

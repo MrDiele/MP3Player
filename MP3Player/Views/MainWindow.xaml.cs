@@ -7,17 +7,11 @@ namespace MP3Player.Views
     /// </summary>
     public partial class MainWindow : Window
     {
-
         #region Конструктор
         public MainWindow()
         {
             InitializeComponent();
         }
         #endregion
-
-        private void m_Slider_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-
-        }
     }
 }

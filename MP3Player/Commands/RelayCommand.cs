@@ -5,7 +5,7 @@ namespace MP3Player.Commands
 {
     public class RelayCommand : ICommand
     {
-        private readonly Action<object> execute;
+        private readonly Action<object> _execute;
 
         public event EventHandler CanExecuteChanged
         {
@@ -15,14 +15,14 @@ namespace MP3Player.Commands
 
         public RelayCommand(Action<object> execute)
         {
-            this.execute = execute;
+            _execute = execute;
         }
 
         public bool CanExecute(object parameter) => true;
 
         public void Execute(object parameter)
         {
-            execute(parameter);
+            _execute(parameter);
         }
     }
 }

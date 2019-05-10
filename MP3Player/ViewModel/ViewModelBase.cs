@@ -4,7 +4,6 @@ namespace MP3Player.ViewModel
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>

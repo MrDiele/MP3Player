@@ -6,7 +6,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="&#171;MP3Player&#187;" Height="390" Width="600" >
-    <!--Closing="Window_Closing"-->
 
     <Window.Resources>
         <CollectionViewSource Source="{Binding ListMP3}" x:Key="ListMP3"/>
@@ -40,7 +39,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <ListBox x:Name="m_listmp" ItemsSource="{Binding Path= MP3file}" Height="30" Grid.Row="0">
-                <!--ItemsSource="{Binding Path= SelectedMP3}"-->
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Canvas x:Name="Canvas" Background="Transparent" Height="25" VerticalAlignment="Top">
@@ -109,10 +107,6 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <!--<StackPanel Grid.Column="0">
-                        <TextBlock Text="Трэк " FontFamily="Vladimir Script" FontSize="20"/>
-                        <TextBlock Text="Громкость" FontSize="20"/>
-                    </StackPanel>-->
                 <StackPanel Grid.Column="1" Grid.ColumnSpan="2">
                     <Slider x:Name="m_Slider" Margin="5" ToolTip="Полоса прокрутки" IsManipulationEnabled="True" IsEnabled="True" IsMoveToPointEnabled="True" AllowDrop="True"   
                                 Maximum="{Binding SliderMaximum}" 
@@ -127,7 +121,6 @@
                 </StackPanel>
             </Grid>
             <ListView x:Name="m_listBox" Grid.Row="3"  ItemsSource="{Binding ListMP3}" SelectedItem="{Binding SelectedMP3}">
-                <!--DataContextChanged="OnMainGridDataContextChanged"-->
                 <ListView.View>
                     <GridView>
                         <GridView.Columns>
