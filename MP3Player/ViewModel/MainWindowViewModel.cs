@@ -33,15 +33,12 @@ namespace MP3Player.ViewModel
         private string _name = string.Empty;
         private string _time_s = string.Empty;
         private double _time = 0;
-        private double _position = 0;
         private bool _flag = true;
 
         private ICommand window_About;
         private ICommand window_Closing;
         private ICommand onClickPrev;
         private ICommand onClickPlay;
-        private ICommand onClickPause;
-        private ICommand onClickStop;
         private ICommand onClickNext;
         private ICommand onClickBrowsButton;
         private ICommand menuItem_Click;
@@ -67,23 +64,19 @@ namespace MP3Player.ViewModel
 
             player.settings.volume = 25;
             player.PlayStateChange += OnStateChanged;
+            player.PositionChange += PositionChange;
             _timer.Interval = new TimeSpan(10000000);
             _timer.Tick += OnTick;
-            //dragMgr = new ListViewDragDropManager<MP3>(m_listMP3);
-            //this.m_listBox.DragEnter += OnListViewDragEnter;
-            //this.m_listBox.Drop += OnListViewDrop;
-
-            //this.Loaded += Window1_Loaded;
         }
         #endregion
 
         #region Set/Get fields
-           
-            #region Время трэка
-            /// <summary>
-            /// Оставшееся время исполнения трэка.
-            /// </summary>
-            public string Time
+
+        #region Время трэка
+        /// <summary>
+        /// Оставшееся время исполнения трэка.
+        /// </summary>
+        public string Time
             {
                 get { return _time_s; }
                 set
@@ -161,6 +154,7 @@ namespace MP3Player.ViewModel
             set
             {
                 _selectedMP3 = value;
+                _stopped = true;
                 RaisePropertyChangedEvent("SelectedMP3");
             }
         }
@@ -287,34 +281,6 @@ namespace MP3Player.ViewModel
         }
 
         /// <summary>
-        /// Команда на приостановку проигрывания выбранного трэка.
-        /// </summary>
-        public ICommand OnClickPause
-        {
-            get
-            {
-                return onClickPause ?? (onClickPause = new RelayCommand((o) =>
-                {
-                    OnClickPauseButton();
-                }));
-            }
-        }
-
-        /// <summary>
-        /// Команда на остановку прогрывания выбранного трэка.
-        /// </summary>
-        public ICommand OnClickStop
-        {
-            get
-            {
-                return onClickStop ?? (onClickStop = new RelayCommand((o) => 
-                {
-                    OnClickStopButton();
-                }));
-            }
-        }
-
-        /// <summary>
         /// Команда на проигрывание следующего трэка из списка.
         /// </summary>
         public ICommand OnClickNext
@@ -402,7 +368,7 @@ namespace MP3Player.ViewModel
         {
             if (SelectedMP3 != null)
             {
-                if (!_paused)
+                if (_stopped)
                 {
                     player.URL = SelectedMP3.Path;
                     _time = Math.Round(SelectedMP3.Duration);
@@ -412,53 +378,24 @@ namespace MP3Player.ViewModel
                     SliderValue = 0;
                     TrackName = SelectedMP3.Name;
                     player.controls.play();
-
+                    _stopped = false;
                     _timer.Start();
                 }
                 else
-                    OnClickPauseButton();
-
-                if (_stopped)
-                    _stopped = false;
+                {
+                    _paused = !_paused;
+                    if (_paused)
+                    {
+                        player.controls.pause();
+                    }
+                    else
+                    {
+                        player.controls.play();
+                    }
+                }
             }
             else
                 MessageBox.Show("Выберите трек для проигрывания!", "Выбор трека", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        /// <summary>
-        /// Обработка нажатия клавиши паузы. 
-        /// </summary>
-        private void OnClickPauseButton()
-        {
-            if (!_paused)
-            {
-                player.controls.pause();
-                _position = player.controls.currentPosition;
-                if (_position != 0)
-                    _paused = !_paused;
-            }
-            else
-            {
-                player.controls.currentPosition = _position;
-
-                if (player.controls.currentPosition != 0)
-                {
-                    player.controls.play();
-                    _timer.Start();
-                    _paused = !_paused;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Обработка нажатия клавиши стоп.
-        /// </summary>
-        private void OnClickStopButton()
-        {
-            _paused = false;
-            _stopped = true;
-            MP3file.Clear();
-            player.controls.stop();
         }
 
         /// <summary>
@@ -506,16 +443,16 @@ namespace MP3Player.ViewModel
             if (m_openfiledlg.ShowDialog() == true)
             {
                 bool flag = true;
-                this._filename = m_openfiledlg.FileName;
-                this._name = System.IO.Path.GetFileNameWithoutExtension(this._filename);
+                _filename = m_openfiledlg.FileName;
+                _name = Path.GetFileNameWithoutExtension(_filename);
                 for (int i = 0; i < _listMP3.Count; i++)
                 {
-                    if (_listMP3[i].Path == this._filename)
+                    if (_listMP3[i].Path == _filename)
                         flag = false;
                 }
                 if (flag)
                 {
-                    _listMP3.Add(TrackCreate(this._filename, this._name));
+                    _listMP3.Add(TrackCreate(_filename, _name));
                 }
                 else
                     MessageBox.Show("Этот трэк уже добавлен!", "Ошибка добавления", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -532,6 +469,14 @@ namespace MP3Player.ViewModel
         #endregion
 
         #region Внутренняя логика 
+
+        private void PositionChange(double oldPosition, double newPosition)
+        {
+            double dif = SliderMaximum - SliderValue;
+            int m = GetMinutes(dif);
+            int s = GetSeconds(dif, m);
+            Time = string.Format("{0}:{1}", m, s);
+        }
 
         /// <summary>
         /// Читает данные из файла.
@@ -606,50 +551,15 @@ namespace MP3Player.ViewModel
         /// <param name="state">Состояние.</param>
         private void OnStateChanged(int state)
         {
-            if (state == 1)
+            switch (state)
             {
-                if (_stopped)
-                {
+                case 1:
+                case 2:
                     _timer.Stop();
-
-                    Time = "";
-                    SliderValue = 0;
-                }
-                else if (state == 1 && !_stopped)
-                {
-                    if (_flag)
-                    {
-                        _timer.Stop();
-                        MP3 nextrack = null;
-
-                        try
-                        {
-                            nextrack = ListMP3[(ListMP3.IndexOf(SelectedMP3) + 1)];
-                        }
-                        catch (Exception) { }
-
-                        if (nextrack != null)
-                        {
-                            SelectedMP3 = nextrack;
-                            player.URL = (SelectedMP3).Path;
-                            AddToListMP3();
-                            _time = Math.Round(SelectedMP3.Duration);
-                            SliderMaximum = _time;
-                            SliderMinimum = 0;
-                            SliderValue = 0;
-                            TrackName = SelectedMP3.Name;
-
-                            _timer.Interval = new TimeSpan(10000000);
-
-                            _timer.Start();
-                            _flag = false;
-                        }
-                    }
-                }
-            }
-            else if (state == 2)
-            {
-                _timer.Stop();
+                    break;
+                case 3:
+                    _timer.Start();
+                    break;
             }
         }
 
